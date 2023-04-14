@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: freelancer-ns
+  labels:
+    name: freelancer-ns
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: freelancer-server-ssd-volume
+  namespace: freelancer-ns
+  labels:
+    type: local
+spec:
+  storageClassName: freelancer-server-ssd
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/freelancer-server"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: freelancer-server-claim
+  namespace: freelancer-ns
+spec:
+  storageClassName: freelancer-server-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: freelancer-server
+  namespace: freelancer-ns
+  labels:
+    app: freelancer-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freelancer-server
+  template:
+    metadata:
+      labels:
+        app: freelancer-server
+    spec:
+      volumes:
+        - name: freelancer-server-storage
+          persistentVolumeClaim:
+            claimName: freelancer-server-claim
+      containers:
+        - name: freelancer-server
+          image: localhost:5000/freelancer-server
+          envFrom:
+            - secretRef:
+                name: mongo-external-secret
+          command: ["npm"]
+          args: ["run", "kube"]
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          resources: {}
+          #command:
+          #  - "npm -v"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 30200
+          readinessProbe:
+            httpGet:
+              path: /api/util/ping
+              port: 30200
+            periodSeconds: 120
+          volumeMounts:
+            - name: freelancer-server-storage
+              mountPath: /app
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: freelancer-server-services
+  namespace: freelancer-ns
+  labels:
+    app: freelancer-server-services
+spec:
+  ports:
+    - protocol: TCP
+      port: 30200
+      targetPort: 30200
+      nodePort: 30200
+  selector:
+    app: freelancer-server
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

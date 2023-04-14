@@ -1,0 +1,27 @@
+{
+  "name": "frelancer_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "www.js",
+  "scripts": {
+    "start": "node  ./www.js ",
+    "debug": "node --nolazy --inspect-brk=9089 ./www.js  ",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "kube": "export PORT=30200 && node  ./www.js "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apicache": "^1.6.3",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "http-errors": "^2.0.0",
+    "jade": "^1.11.0",
+    "moment-timezone": "^0.5.43",
+    "mongodb": "^5.2.0",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.6.1"
+  }
+}

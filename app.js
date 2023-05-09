@@ -8,7 +8,7 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 
 
 
@@ -32,11 +32,14 @@ var WebSocketIo;
 var db;
 const sessionsMap = {};
 
-app.bigStart = async (server) => {
+app.bigStart = async (io) => {
 
-    WebSocketIo = new Server(server);; //(http);
+    // WebSocketIo = require('socket.io')(server, { cors: { origin: "*" } });
+
+    WebSocketIo = io
+
     WebSocketIo.on('connection', function (socket) {
-        // console.log('a user connected ' + socket.id);
+        console.log('a user connected ' + socket.id);
         socket.emit('askForUserId', socket.id);
 
         socket.on('userIdReceived', (userId) => {
@@ -46,6 +49,7 @@ app.bigStart = async (server) => {
             // console.log('user disconnected ' + socket.id);
         });
     });
+
     try {
 
         client = new MongoClient(process.env.MONGO_ARC || process.env.mongoexternal)
@@ -62,13 +66,17 @@ app.bigStart = async (server) => {
 
 cargaDadosByOwner = function () {
 
-    db.collection('postsRecents').watch()
+    db.collection('projects').watch()
 
         .on('change', (change) => {
-            let send = change.fullDocument || {};
-            send.operationType = change.operationType;
-            send._id = change.documentKey._id.toString();
-            WebSocketIo.emit('savedOwner', send);
+            // let send = change.fullDocument || {};
+            // send.operationType = change.operationType;
+            // send._id = change.documentKey._id.toString();
+            if (change.operationType == 'insert')
+                WebSocketIo.emit('newprojects', change);
+            else
+
+                WebSocketIo.emit('alterProject', change);
         });
 }
 

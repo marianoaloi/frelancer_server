@@ -1,20 +1,27 @@
 
-const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const app = require('./app');
+const server = require('http').Server(app);
 
 
-const port = normalizePort(process.env.PORT || '3004');
+const port = normalizePort(process.env.PORT || '3009');
 
-const server = http.createServer(app);
+const io = require('socket.io')(server, {
+    allowEIO3: true // false by default
+    ,
+    cors: {
+        credentials: true,
+        origin: 'http://192.168.25.90:4200',
+    }
+});
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-app.bigStart(server);
+app.bigStart(io);
 
 
 /**

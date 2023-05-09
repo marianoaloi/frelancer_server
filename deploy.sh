@@ -1,13 +1,17 @@
 #!/bin/bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+cd $SCRIPT_DIR
+
 copy(){
-        scp -r /opt/maloi/node/frelancer_server/Dockerfile kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/package*.json kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/*.js kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/public kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/routes kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/views kube:"/data/freelancer-server/"
-        scp -r /opt/maloi/node/frelancer_server/*.yaml kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/Dockerfile kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/package*.json kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/*.js kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/public kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/routes kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/views kube:"/data/freelancer-server/"
+        scp -r $SCRIPT_DIR/*.yaml kube:"/data/freelancer-server/"
 
 }
 
@@ -18,7 +22,8 @@ compile(){
         # ssh kube 'cd /data/freelancer-server && npm i deasync '
         ssh kube 'cd /data/freelancer-server && npm install --production '
         ssh kube 'cd /data/freelancer-server && docker build --pull --rm -f Dockerfile -t freelancer-server:latest . && docker tag freelancer-server localhost:5000/freelancer-server && docker push localhost:5000/freelancer-server'
-        ssh kube 'kubectl create secret generic -n freelancer-ns mongo-external-secret --from-literal=mongoexternal="'$MONGO_ARC'"'
+        ssh kube 'kubectl delete secret -n freelancer-ns mongo-external-secret '
+        ssh kube 'kubectl create secret generic -n freelancer-ns mongo-external-secret --from-literal=mongoexternal="'$MONGO_ARC'" --from-literal=free_pat="'$free_pat'"'
 }
 case $1 in
     compile)

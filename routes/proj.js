@@ -23,9 +23,66 @@ const homescreen = function (req, res, next) {
     }, {
       '$skip': 0
     }, {
-      '$limit': 100
+      '$limit': 30
     }
   ];
+
+  if (req.query.jobnameregex) {
+    queryAggregate[0].$match["jobs.name"] = { $regex: req.query.jobnameregex, $options: 'i' };
+  }
+  if (req.query.minimum || req.query.maximum) {
+    // queryAggregate[0].$match["budget.minimum"] = { '$gt': parseFloat(req.query.minimum) };
+    queryAggregate.splice(1, 0,
+      {
+        "$lookup": {
+          from: 'currencys',
+          localField: 'currency.code',
+          foreignField: 'code',
+          as: 'result'
+        }
+      }
+    )
+
+    filters = []
+    if (req.query.minimum) {
+      filters.push(
+        {
+          "$gt": [
+            { $multiply: ['$budget.minimum', { $first: '$result.exchange_rate' }] }
+            ,
+            parseFloat(req.query.minimum)
+          ]
+        }
+      )
+    }
+    if (req.query.maximum) {
+      filters.push(
+        {
+          "$lt": [
+            { $multiply: ['$budget.maximum', { $first: '$result.exchange_rate' }] }
+            ,
+            parseFloat(req.query.maximum)
+          ]
+        }
+      )
+    }
+
+
+    queryAggregate.splice(2, 0,
+      {
+        '$match': {
+          "$expr": {
+            "$and": filters
+          },
+        }
+      }
+    )
+  }
+  if (req.query.titleregex) {
+    queryAggregate[0].$match["title"] = { $regex: req.query.titleregex, $options: 'i' };
+  }
+
+  //"jobs.name":{$regex:'java' , $options:'i'}
 
 
   req.db.collection('projects').aggregate(

@@ -69,14 +69,8 @@ cargaDadosByOwner = function () {
     db.collection('projects').watch()
 
         .on('change', (change) => {
-            // let send = change.fullDocument || {};
-            // send.operationType = change.operationType;
-            // send._id = change.documentKey._id.toString();
-            if (change.operationType == 'insert')
-                WebSocketIo.emit('newprojects', change);
-            else
 
-                WebSocketIo.emit('alterProject', change);
+            WebSocketIo.emit('alterProject', change);
         });
 }
 

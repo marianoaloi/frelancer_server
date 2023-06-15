@@ -23,10 +23,16 @@ const homescreen = function (req, res, next) {
     }, {
       '$skip': 0
     }, {
-      '$limit': 30
+      '$limit': 100
     }
   ];
 
+  if (req.query.showIgnore) {
+    delete queryAggregate[0].$match["ignore"]
+  }
+  if (!req.query.showFollow) {
+    queryAggregate[0].$match["follow"] = { '$exists': false }
+  }
   if (req.query.jobnameregex) {
     queryAggregate[0].$match["jobs.name"] = { $regex: req.query.jobnameregex, $options: 'i' };
   }
@@ -155,6 +161,15 @@ router.put("/follow", (req, res, next) => {
   prj = req.body;
   if (prj?._id) {
     res.json(req.db.collection('projects').updateOne({ _id: prj._id }, { "$set": { follow: new Date() } }))
+  }
+})
+
+
+router.post("/save", (req, res, next) => {
+
+  prj = req.body;
+  if (prj?._id) {
+    res.json(req.db.collection('projects').updateOne({ _id: prj._id }, { "$set": prj }))
   }
 })
 

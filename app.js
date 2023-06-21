@@ -43,6 +43,7 @@ app.bigStart = async (io) => {
         socket.emit('askForUserId', socket.id);
 
         socket.on('userIdReceived', (userId) => {
+            console.log(userId, "maloi");
             sessionsMap[userId] = socket.id;
         });
         socket.on('disconnect', function () {

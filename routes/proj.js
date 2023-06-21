@@ -118,7 +118,10 @@ router.post('/get', homescreenPost);
 
 router.put("/ignore", (req, res, next) => {
   prj = req.body;
-  if (prj?._id) {
+  if (Array.isArray(prj)) {
+    res.json(req.db.collection('projects').updateMany({ _id: { $in: prj.map(x => x._id) } }, { "$set": { ignore: new Date() } }))
+  }
+  else if (prj?._id) {
     res.json(req.db.collection('projects').updateOne({ _id: prj._id }, { "$set": { ignore: new Date() } }))
   }
 })

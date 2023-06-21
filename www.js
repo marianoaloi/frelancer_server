@@ -13,7 +13,7 @@ const io = require('socket.io')(server, {
     ,
     cors: {
         credentials: true,
-        origin: 'http://192.168.25.90:4200',
+        origin: '*',
     }
 });
 

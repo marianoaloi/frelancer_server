@@ -176,6 +176,24 @@ router.post("/save", (req, res, next) => {
   }
 })
 
+router.post("/sendBid", (req, res, next) => {
+
+  bid = req.body;
+  if (bid?.project_id) {
+    let options = {
+      method: 'POST',
+      host: 'www.freelancer.com',
+
+
+      path: `/api/projects/0.1/bids/`,
+      qs: { compact: true, full_description: true, job_details: true },
+
+      //This is the only line that is new. `headers` is an object with the headers to request
+      headers: header
+    };
+  }
+})
+
 router.put("/projectRefresh", (req, res, next) => {
   prj = req.body;
   if (prj?.id) {

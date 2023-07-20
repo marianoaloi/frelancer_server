@@ -180,17 +180,40 @@ router.post("/sendBid", (req, res, next) => {
 
   bid = req.body;
   if (bid?.project_id) {
+    let intHeader = {
+      ...header
+    }
+    intHeader["Content-Type"] = "application/json"
     let options = {
       method: 'POST',
       host: 'www.freelancer.com',
 
 
       path: `/api/projects/0.1/bids/`,
-      qs: { compact: true, full_description: true, job_details: true },
 
       //This is the only line that is new. `headers` is an object with the headers to request
-      headers: header
+      headers: intHeader
     };
+    var reqInternal = http.request(options, (response) => {
+      response.setEncoding('utf8');
+      let str = ''
+      response.on('data', (d) => {
+
+        str += d
+      });
+
+      response.on('end', function () {
+
+        let content = JSON.parse(str)
+        res.json(content)
+      });
+    })
+    req.on('error', function (e) {
+      console.log('problem with request: ' + e.message);
+    });
+    reqInternal.write(JSON.stringify(bid));
+
+    reqInternal.end();
   }
 })
 

@@ -89,6 +89,7 @@ let cache = apicache.middleware
 
 app.use('/api/proj', require('./routes/proj'));
 app.use('/api/bid', require('./routes/bid'));
+app.use('/api/android', require('./routes/android'));
 app.use('/api/util', cache("3 hours"), require('./routes/util'));
 
 const sleep = (ms) => {

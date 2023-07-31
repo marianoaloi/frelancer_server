@@ -30,6 +30,9 @@ const homescreen = function (req, res, next) {
   if (req.query.showIgnore) {
     delete queryAggregate[0].$match["ignore"]
   }
+  if (req.query.urgent) {
+    queryAggregate[0].$match["urgent"] = true
+  }
   if (!req.query.showFollow) {
     queryAggregate[0].$match["follow"] = { '$exists': false }
   }

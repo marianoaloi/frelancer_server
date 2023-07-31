@@ -179,6 +179,14 @@ router.get('/bymoney', (req, res, next) => {
                 }
             }
         }, {
+            '$match': {
+                '$expr': {
+                    '$gt': [
+                        '$count', '$ignore'
+                    ]
+                }
+            }
+        }, {
             '$sort': {
                 'media': -1
             }
